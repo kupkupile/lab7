@@ -101,7 +101,7 @@ void LIM(state* s){
 	char beforeCopyingToMem[(length*(progState->unit_size))+1];
 	fgets(beforeCopyingToMem,(length*(progState->unit_size)),F);
 	strcpy((progState->mem_buf)+locationNum, beforeCopyingToMem);
-
+	fclose(F);
 
 }
 struct fun_desc menu[] = {{"Toggle Debug Mode",TDM},{"Set File Name",SFN},{"Set Unit Size",SUS},{"Load Into Memory",LIM},{"quit",quit},{NULL,NULL}};
