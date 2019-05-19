@@ -52,7 +52,10 @@ void TDM(state* s){
  
 }
 void SFN(state* s){
-	fgets(progState->file_name,100,stdin);
+	char beforeTok[128];
+	fgets(beforeTok,100,stdin);
+	strtok(beforeTok,"\n");
+	strcpy(s->file_name, beforeTok);
 	fflush(stdin);
 	char* messageToSend;
 	printDebug("DEBUG: file name set to ");
@@ -78,14 +81,38 @@ void SUS(state* s){
 		printf("ERROR, an unexpected number\n");
 	}	
 }
+void LIM(state* s){
+	if(s->file_name[0]==NULL){
+		perror("ERROR, File name is null\n");
+		return;
+	}
+	FILE *F = fopen(s->file_name,"r");
+	if(F==NULL){
+		perror("Cannot open file for reading\n");
+		return;
+	}
+	printf("Please enter <location> <length>\n");
+	char inputString[120];
+	int locationNum;
+	int length;
+	fgets(inputString, 120,stdin);
+	fflush(stdin);
+	sscanf(inputString, "%0x %d",&locationNum, &length);
+	char beforeCopyingToMem[(length*(progState->unit_size))+1];
+	fgets(beforeCopyingToMem,(length*(progState->unit_size)),F);
+	strcpy((progState->mem_buf)+locationNum, beforeCopyingToMem);
 
-struct fun_desc menu[] = {{"Toggle Debug Mode",TDM},{"Set File Name",SFN},{"Set Unit Size",SUS},{"quit",quit},{NULL,NULL}};
+
+}
+struct fun_desc menu[] = {{"Toggle Debug Mode",TDM},{"Set File Name",SFN},{"Set Unit Size",SUS},{"Load Into Memory",LIM},{"quit",quit},{NULL,NULL}};
 
 
 
 int main(int argc, char **argv){
 	 progState = malloc(sizeof(state));
 	 progState->debug_mode = '0';
+	 progState->unit_size=1;
+	 progState->file_name[0] = NULL;
 	 char name[1];
 	 int chosenFun;
 	 int menuSize = sizeof(menu)/(sizeof (struct fun_desc));
