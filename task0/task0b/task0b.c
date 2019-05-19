@@ -52,13 +52,13 @@ void SFM(state* s){
 }
 void SUS(state* s){
 	int unitNum;
-	char num[1];
+	char* num;
 	printf("Enter a number:\n");
 	fgets(num,100,stdin);
 	unitNum = atoi(num);
 	
-	if((unitNum!=1)&&(unitNum!=2)&&(unitNum!=4)){
-		progState->unit_size = unitNum;
+	if((unitNum==1)||(unitNum!=2)||(unitNum!=4)){
+		s->unit_size = unitNum;
 	}
 
 	else{
