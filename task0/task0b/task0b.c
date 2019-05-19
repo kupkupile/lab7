@@ -52,9 +52,10 @@ void SFM(state* s){
 }
 void SUS(state* s){
 	int unitNum;
-	char* num;
+	char num[124];
 	printf("Enter a number:\n");
 	fgets(num,100,stdin);
+	fflush(stdin);
 	unitNum = atoi(num);
 	
 	if((unitNum==1)||(unitNum!=2)||(unitNum!=4)){
