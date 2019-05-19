@@ -3,13 +3,6 @@
 #include <stdlib.h>
 
 
-
-
-
-
-
-
-
 typedef struct {
   char debug_mode;
   char file_name[128];
@@ -31,9 +24,7 @@ struct fun_desc {
 
 state *progState = NULL;
 
-void quit(state* s){
-	exit(0);
-}
+
 
 void TDM(state* s){
 	printf("%c\n",s->debug_mode);
@@ -62,8 +53,21 @@ void SUS(state* s){
 		perror("ERROR, an unexpected number\n");
 	}	
 }
-void printDebug(char c){
-	
+void printDebug(char * string){
+	if(progState->debug_mode=='1'){
+	    if(strncmp(string, "builtin", 7) ==0){
+            printf("Unit size: %d\tFileName: %s\tMemCount: %d\n",progState->unit_size, progState->file_name, (int)progState->mem_count);
+
+	    }
+	    else{
+	        printf("%s\n",string);
+	    }
+	}
+}
+
+void quit(state* s){
+    printDebug("quit");
+    exit(0);
 }
 
 struct fun_desc menu[] = {{"Toggle Debug Mode",TDM},{"Set File Name",SFM},{"Set Unit Size",SUS},{"quit",quit},{NULL,NULL}};
@@ -73,11 +77,10 @@ struct fun_desc menu[] = {{"Toggle Debug Mode",TDM},{"Set File Name",SFM},{"Set 
 int main(int argc, char **argv){
 	 progState = malloc(sizeof(state));
 	 progState->debug_mode = '0';
-
 	 int menuSize = sizeof(menu)/(sizeof (struct fun_desc));
 	 while(1){
      printf("Please choose a function:\n");
-     printDebug(progState->debug_mode);
+     printDebug("builtin");
      for(int i=0;i<menuSize-1;i++){
     	printf("%d) ",i);
     	printf("%s\n",menu[i].name);
