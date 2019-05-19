@@ -51,19 +51,22 @@ void SFM(state* s){
 	fgets(progState->file_name,100,stdin);
 }
 void SUS(state* s){
+	int unitNum;
+	char num[1];
 	printf("Enter a number:\n");
-	int num = fgetc(stdout);
-	printf("%d",num);
-	if((num!=1)&&(num!=2)&&(num!=4)){
-		progState->unit_size = num;
+	fgets(num,100,stdin);
+	unitNum = atoi(num);
+	
+	if((unitNum!=1)&&(unitNum!=2)&&(unitNum!=4)){
+		progState->unit_size = unitNum;
 	}
 
 	else{
-		perror("ERROR, an unexpected number\n");
+		printf("ERROR, an unexpected number\n");
 	}	
 }
 void printDebug(char c){
-	
+
 }
 
 struct fun_desc menu[] = {{"Toggle Debug Mode",TDM},{"Set File Name",SFM},{"Set Unit Size",SUS},{"quit",quit},{NULL,NULL}};
@@ -73,7 +76,8 @@ struct fun_desc menu[] = {{"Toggle Debug Mode",TDM},{"Set File Name",SFM},{"Set 
 int main(int argc, char **argv){
 	 progState = malloc(sizeof(state));
 	 progState->debug_mode = '0';
-
+	 char name[1];
+	 int chosenFun;
 	 int menuSize = sizeof(menu)/(sizeof (struct fun_desc));
 	 while(1){
      printf("Please choose a function:\n");
@@ -82,6 +86,14 @@ int main(int argc, char **argv){
     	printf("%d) ",i);
     	printf("%s\n",menu[i].name);
 	   }
+	    printf("type:");
+    	fgets(name,100,stdin);
+   		chosenFun = atoi(name);
+   		if((chosenFun>=0)&& (chosenFun<=3))
+   			((menu[chosenFun]).fun)(progState);
+   		else{
+   			perror("ERROR: ARguemnts are not Valid \n");
+   		}	
 	  }
 }
 
