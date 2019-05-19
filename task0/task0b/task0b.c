@@ -1,3 +1,6 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 
 
@@ -5,11 +8,6 @@
 
 
 
-struct fun_desc {
-  char *name;
-  void fun(state* s); /* etting the state as a pointer allows the functions to change it.*/
-
-};
 
 
 typedef struct {
@@ -25,6 +23,11 @@ typedef struct {
   */
 } state;
 
+struct fun_desc {
+  char *name;
+  void (*fun)(state* s); /* setting the state as a pointer allows the functions to change it.*/
+
+};
 
 state *progState = NULL;
 
@@ -48,7 +51,19 @@ void SFM(state* s){
 	fgets(progState->file_name,100,stdin);
 }
 void SUS(state* s){
+	printf("Enter a number:\n");
+	int num = fgetc(stdout);
+	printf("%d",num);
+	if((num!=1)&&(num!=2)&&(num!=4)){
+		progState->unit_size = num;
+	}
 
+	else{
+		perror("ERROR, an unexpected number\n");
+	}	
+}
+void printDebug(char c){
+	
 }
 
 struct fun_desc menu[] = {{"Toggle Debug Mode",TDM},{"Set File Name",SFM},{"Set Unit Size",SUS},{"quit",quit},{NULL,NULL}};
