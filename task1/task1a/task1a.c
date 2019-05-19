@@ -39,6 +39,8 @@ void quit(state* s){
 	exit(0);
 }
 
+
+
 void TDM(state* s){
 	printf("%c\n",s->debug_mode);
 	if(s->debug_mode == '1'){
@@ -99,12 +101,110 @@ void LIM(state* s){
 	fflush(stdin);
 	sscanf(inputString, "%0x %d",&locationNum, &length);
 	char beforeCopyingToMem[(length*(progState->unit_size))+1];
+	fseek(F,locationNum,SEEK_SET);
 	fgets(beforeCopyingToMem,(length*(progState->unit_size)),F);
-	strcpy((progState->mem_buf)+locationNum, beforeCopyingToMem);
+	strcpy((progState->mem_buf), beforeCopyingToMem);
+	fclose(F);
+	printf("Loaded %d units into the memory \n",length);
+
+}
+
+
+char* unit_to_format(int unit) {
+	static char* formats[] = {"%#hhx\n", "%#hx\n", "No such unit", "%#x\n"};
+	return formats[unit-1];
+	}
+void read_units_to_memory(FILE* input, char* buffer, int count) {
+	fread(buffer, progState->unit_size , count, input);
+}
+void print_units(FILE* output, char* buffer, int count) {
+	char* end = buffer + (progState->unit_size)*count;
+	while (buffer < end) {
+		//print ints
+		int decimalValue =0;
+		int var = *((int*)(buffer));
+		char toChange[1000];
+//		sscanf(buffer, "%d", &decimalValue);
+		sprintf(toChange, unit_to_format(progState->unit_size), var);
+		sscanf(toChange+2, "%0x\n",&decimalValue);
+		printf("%d",decimalValue);
+		printf("           ");
+
+		fprintf(output, unit_to_format(progState->unit_size), var);
+		printf("\n");
+		buffer += (progState->unit_size);
+	}
+//	fflush(stdin);
+}
+
+/* Writes buffer to file without converting it to text with write */
+void write_units(FILE* output, char* buffer, int count, size_t unitSize) {
+	fwrite(buffer, unitSize, count, output);
+}
+
+void MD(state* s){
+	char inputString[120];
+	int numOfUnits;
+	int addr;
+	FILE *F = fopen(s->file_name,"r");
+	fgets(inputString, 120,stdin);
+	fflush(stdin);
+	sscanf(inputString, "%0x %d",&addr, &numOfUnits);
+	if((F==NULL)&&(addr!=0)){
+		perror("Cannot open file for reading\n");
+		return;
+	}
+	printf("Decimal   Hexadecimal\n");
+	printf("======================\n");
+	if(addr!=0) {
+		fseek(F, addr, SEEK_SET);
+
+	}
+	else{
+		print_units(stdout,progState->mem_buf,numOfUnits);
+	}
+
 	fclose(F);
 
 }
-struct fun_desc menu[] = {{"Toggle Debug Mode",TDM},{"Set File Name",SFN},{"Set Unit Size",SUS},{"Load Into Memory",LIM},{"quit",quit},{NULL,NULL}};
+
+void SIF(state* s){
+	printf("Please enter <source-address> <target-location> <length>\n");
+	char inputString[120];
+	int sourceAddress;
+	int targetLocation;
+	int length;
+	int fileSize;
+	fgets(inputString, 120,stdin);
+	fflush(stdin);
+	sscanf(inputString, "%0x %0x %d",&sourceAddress, &targetLocation, &length);
+	FILE* F;
+	F = fopen(s->file_name, "r+");
+	if(F==NULL){
+		perror("Cannot open file for reading\n");
+		return;
+	}
+
+	fseek(F, 0L, SEEK_END);
+	fileSize = ftell(F);
+	fseek(F, 0L, SEEK_SET);
+	fseek(F,targetLocation,SEEK_SET);
+	if(targetLocation > fileSize){
+		perror("ERROR:::: SIF -> targetLocation is bigger than fileSize\n");
+	}
+	if(sourceAddress == 0){
+		write_units(F, progState->mem_buf,length,(size_t) s->unit_size);
+	}
+	else{
+		write_units(F, sourceAddress, length, (size_t)s->unit_size);
+	}
+
+	fclose(F);
+
+}
+
+struct fun_desc menu[] = {{"Toggle Debug Mode",TDM},{"Set File Name",SFN},{"Set Unit Size",SUS},{"Load Into Memory",LIM},{"Memory Display",MD}, {"Save Into File", SIF},{"quit",quit},{NULL,NULL}};
+int menuSize = sizeof(menu)/(sizeof (struct fun_desc));
 
 
 
@@ -115,7 +215,6 @@ int main(int argc, char **argv){
 	 progState->file_name[0] = NULL;
 	 char name[1];
 	 int chosenFun;
-	 int menuSize = sizeof(menu)/(sizeof (struct fun_desc));
 	 while(1){
      printf("Please choose a function:\n");
      printDebug("builtin");
@@ -126,7 +225,7 @@ int main(int argc, char **argv){
 	    printf("type:");
     	fgets(name,100,stdin);
    		chosenFun = atoi(name);
-   		if((chosenFun>=0)&& (chosenFun<=3))
+   		if((chosenFun>=0)&& (chosenFun<=5))
    			((menu[chosenFun]).fun)(progState);
    		else{
    			perror("ERROR: ARguemnts are not Valid \n");
