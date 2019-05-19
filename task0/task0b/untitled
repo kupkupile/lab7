@@ -1,0 +1,7 @@
+
+
+
+
+
+
+void fun(state* s); // Getting the state as a pointer allows the functions to change it.
