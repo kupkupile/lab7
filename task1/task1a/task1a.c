@@ -161,7 +161,7 @@ void MD(state* s){
 	printf("Decimal   Hexadecimal\n");
 	printf("======================\n");
 	if(addr!=0) {
-	    char* buffer;
+	    char* buffer = malloc(numOfUnits*(progState->unit_size));
 		fseek(F, addr, SEEK_SET);
 		read_units_to_memory(F,buffer,numOfUnits);
         print_units(stdout,buffer,numOfUnits);

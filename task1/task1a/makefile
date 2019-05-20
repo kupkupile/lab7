@@ -1,8 +1,7 @@
-all: d
-
-d: d.o
-		gcc -g -m32 -Wall -fno-pic digit.c -o d
+all: clean digit_cnt
+	gcc -Wall -g -m32 -fno-pic ./digit_cnt.c -o digit_cnt
 
 .PHONY: clean
-
-clean: rm -f *.o d
+	
+clean:
+	rm -f ./digit_cnt
