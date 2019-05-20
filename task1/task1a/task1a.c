@@ -90,7 +90,7 @@ void LIM(state* s){
 	}
 	FILE *F = fopen(s->file_name,"r");
 	if(F==NULL){
-		perror("Cannot open file for reading\n");
+		perror("Cannot open file for reading");
 		return;
 	}
 	printf("Please enter <location> <length>\n");
@@ -168,6 +168,26 @@ void MD(state* s){
 
 }
 
+void FM(state* s){
+	FILE *F = fopen(s->file_name, "r+");
+	if(F==NULL){
+		perror("Cannot open file for reading");
+		return;
+	}
+	printf("Please enter <location> <val>\n");
+	char inputString[120];
+	int location;
+	char value[120];
+	fgets(inputString, 120,stdin);
+	fflush(stdin);
+	sscanf(inputString, "%d %s",&location,value);
+	fseek(F,location,SEEK_SET);
+	fwrite(value,1,strlen(value),F);
+	fclose(F);
+}
+
+
+
 void SIF(state* s){
 	printf("Please enter <source-address> <target-location> <length>\n");
 	char inputString[120];
@@ -203,7 +223,7 @@ void SIF(state* s){
 
 }
 
-struct fun_desc menu[] = {{"Toggle Debug Mode",TDM},{"Set File Name",SFN},{"Set Unit Size",SUS},{"Load Into Memory",LIM},{"Memory Display",MD}, {"Save Into File", SIF},{"quit",quit},{NULL,NULL}};
+struct fun_desc menu[] = {{"Toggle Debug Mode",TDM},{"Set File Name",SFN},{"Set Unit Size",SUS},{"Load Into Memory",LIM},{"Memory Display",MD}, {"Save Into File", SIF},{"File Modify",FM},{"quit",quit},{NULL,NULL}};
 int menuSize = sizeof(menu)/(sizeof (struct fun_desc));
 
 
@@ -225,10 +245,10 @@ int main(int argc, char **argv){
 	    printf("type:");
     	fgets(name,100,stdin);
    		chosenFun = atoi(name);
-   		if((chosenFun>=0)&& (chosenFun<=5))
+   		if((chosenFun>=0)&& (chosenFun<=6))
    			((menu[chosenFun]).fun)(progState);
    		else{
-   			perror("ERROR: ARguemnts are not Valid \n");
+   			printf("ERROR: ARguemnts are not Valid \n");
    		}	
 	  }
 }
