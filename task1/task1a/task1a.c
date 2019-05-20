@@ -103,7 +103,10 @@ void LIM(state* s){
 	char beforeCopyingToMem[(length*(progState->unit_size))+1];
 	fseek(F,locationNum,SEEK_SET);
 	fgets(beforeCopyingToMem,(length*(progState->unit_size)),F);
-	strcpy((progState->mem_buf), beforeCopyingToMem);
+	for(int i = 0; i<(length*(progState->unit_size))+1;i++){
+	    progState->mem_buf[i] = beforeCopyingToMem[i];
+	}
+//	strcpy((progState->mem_buf), beforeCopyingToMem);
 	fclose(F);
 	printf("Loaded %d units into the memory \n",length);
 
@@ -147,6 +150,7 @@ void MD(state* s){
 	int numOfUnits;
 	int addr;
 	FILE *F = fopen(s->file_name,"r");
+    printf("Please enter <location> <NumOFUnits>\n");
 	fgets(inputString, 120,stdin);
 	fflush(stdin);
 	sscanf(inputString, "%0x %d",&addr, &numOfUnits);
@@ -157,8 +161,10 @@ void MD(state* s){
 	printf("Decimal   Hexadecimal\n");
 	printf("======================\n");
 	if(addr!=0) {
+	    char* buffer;
 		fseek(F, addr, SEEK_SET);
-
+		read_units_to_memory(F,buffer,numOfUnits);
+        print_units(stdout,buffer,numOfUnits);
 	}
 	else{
 		print_units(stdout,progState->mem_buf,numOfUnits);
@@ -180,9 +186,10 @@ void FM(state* s){
 	char value[120];
 	fgets(inputString, 120,stdin);
 	fflush(stdin);
-	sscanf(inputString, "%d %s",&location,value);
+	sscanf(inputString, "%0x %s",&location,value);
+	unsigned  char toInsert = strtol(value,NULL,16);
 	fseek(F,location,SEEK_SET);
-	fwrite(value,1,strlen(value),F);
+	fwrite(&toInsert,sizeof(toInsert),1,F);
 	fclose(F);
 }
 
@@ -223,6 +230,8 @@ void SIF(state* s){
 
 }
 
+
+
 struct fun_desc menu[] = {{"Toggle Debug Mode",TDM},{"Set File Name",SFN},{"Set Unit Size",SUS},{"Load Into Memory",LIM},{"Memory Display",MD}, {"Save Into File", SIF},{"File Modify",FM},{"quit",quit},{NULL,NULL}};
 int menuSize = sizeof(menu)/(sizeof (struct fun_desc));
 
@@ -245,7 +254,7 @@ int main(int argc, char **argv){
 	    printf("type:");
     	fgets(name,100,stdin);
    		chosenFun = atoi(name);
-   		if((chosenFun>=0)&& (chosenFun<=6))
+   		if((chosenFun>=0)&& (chosenFun<=7))
    			((menu[chosenFun]).fun)(progState);
    		else{
    			printf("ERROR: ARguemnts are not Valid \n");
